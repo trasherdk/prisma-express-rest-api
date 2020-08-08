@@ -1,5 +1,8 @@
 import { body, validationResult, ValidationChain } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const validate = (schemas: ValidationChain[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -11,13 +14,28 @@ export const validate = (schemas: ValidationChain[]) => {
     }
 
     const errors = result.array();
-    return res.status(400).json(errors);
+    return res.status(422).json(errors);
   };
 };
 
 export const createUserSchema = [
   body('name', 'Name is required').notEmpty(),
-  body('email', 'Email is required').notEmpty(),
+  body('email', 'Email is required')
+    .notEmpty()
+    .custom((value) => {
+      if (!value) return true;
+      return prisma.user
+        .findOne({
+          where: {
+            email: value,
+          },
+        })
+        .then((user) => {
+          if (user) {
+            return Promise.reject('E-mail already in use');
+          }
+        });
+    }),
 ];
 
 export const createPostSchema = [
