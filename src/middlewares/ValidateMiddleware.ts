@@ -41,9 +41,7 @@ export const createUserSchema = [
 export const updateUserSchema = [
   body('name', 'Name is required').notEmpty(),
   body('email', 'Email is required').custom((value, { req: { params } }) => {
-    if (!value) {
-      throw new Error('E-mail is required');
-    }
+    if (!value) return true;
     return prisma.user
       .findOne({
         where: {
