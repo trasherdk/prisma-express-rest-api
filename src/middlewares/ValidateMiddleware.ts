@@ -38,7 +38,32 @@ export const createUserSchema = [
     }),
 ];
 
+export const updateUserSchema = [
+  body('name', 'Name is required').notEmpty(),
+  body('email', 'Email is required').custom((value, { req: { params } }) => {
+    if (!value) {
+      throw new Error('E-mail is required');
+    }
+    return prisma.user
+      .findOne({
+        where: {
+          email: value,
+        },
+      })
+      .then((user) => {
+        if (user && params?.id && Number(params.id) !== user.id) {
+          return Promise.reject('E-mail already in use');
+        }
+      });
+  }),
+];
+
 export const createPostSchema = [
+  body('title', 'Title is required').notEmpty(),
+  body('authorId', 'Author is required').notEmpty(),
+];
+
+export const updatePostSchema = [
   body('title', 'Title is required').notEmpty(),
   body('authorId', 'Author is required').notEmpty(),
 ];

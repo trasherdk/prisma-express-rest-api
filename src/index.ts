@@ -18,7 +18,9 @@ import {
 import {
   validate,
   createUserSchema,
+  updateUserSchema,
   createPostSchema,
+  updatePostSchema,
 } from './middlewares/ValidateMiddleware';
 
 const app = express();
@@ -29,14 +31,14 @@ app.use(bodyParser.json());
 app.get('/users', getUsers);
 app.get('/users/:id', getUser);
 app.post('/users', validate(createUserSchema), createUser);
-app.put('/users/:id', updateUser);
+app.put('/users/:id', validate(updateUserSchema), updateUser);
 app.delete('/users/:id', deleteUser);
 
 // Posts
 app.get('/posts', getPosts);
 app.get('/posts/:id', getPost);
 app.post('/posts', validate(createPostSchema), createPost);
-app.put('/posts/:id', updatePost);
+app.put('/posts/:id', validate(updatePostSchema), updatePost);
 app.delete('/posts/:id', deletePost);
 
 app.listen(3000, () => {
